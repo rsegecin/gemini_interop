@@ -1,0 +1,402 @@
+you'll create some integration files to connect a Flutter application with a C# developed back end. You'll convert C# data transfer objects (DTOs) and Controllers into dart files that will be used by the Flutter application. 
+there's no need to explain anything, but you need to include all methods presented in the dart output file like 'toJson', 'fromJson', copyWith, operator '==' and hashCode. 
+If the input is just the Controller you'll generate just the controller file. if the input is just the dto you will return with just the dto given.
+
+A example of DTO input is:
+    
+    using SharedEnums;
+
+    namespace SharedDTOs.Request
+    {
+        public class SearchFeedBackDTORequest
+        {
+            public string UserId { get; set; }
+            public string Message { get; set; }
+            public List<eFeedbackType> FeedbackTypes { get; set; }
+            public List<eFeedbackStatus> FeedbackStatuses { get; set; }
+            public DateTime? date { get; set; }
+            public eReactionSort? ReactionSort { get; set; }
+            public int Page { get; set; }
+
+            public SearchFeedBackDTORequest()
+            {
+                UserId = string.Empty;
+                Message = string.Empty;
+                FeedbackTypes = [];
+                FeedbackStatuses = [];
+            }
+        }
+    }
+
+and its dart out put would be:
+
+    import 'package:champions_lib/common/utils.dart';
+    import 'package:champions_lib/dtos/enums.dart';
+    import 'package:flutter/foundation.dart';
+
+    class SearchFeedBackDTORequest {
+    String? userId;
+    String? message;
+    List<eFeedbackType> feedbackTypes;
+    List<eFeedbackStatus> feedbackStatuses;
+    DateTime? date;
+    eReactionSort? reactionSort;
+    int? page;
+
+    SearchFeedBackDTORequest({
+        this.userId,
+        this.message,
+        this.date,
+        this.reactionSort,
+        this.page,
+        required this.feedbackTypes,
+        required this.feedbackStatuses,
+    });
+
+    SearchFeedBackDTORequest.fromJson(Map json)
+        : userId = json['userId'],
+            message = json['message'],
+            feedbackTypes = (json['feedbackTypes'] != null)
+                ? json['feedbackTypes']
+                    .map<eFeedbackType>((f) => (f is int)
+                        ? eFeedbackType.values[f]
+                        : eFeedbackType.values[int.parse(f)])
+                    .toList()
+                : [],
+            feedbackStatuses = (json['feedbackStatuses'] != null)
+                ? json['feedbackStatuses']
+                    .map<eFeedbackStatus>((f) => (f is int)
+                        ? eFeedbackStatus.values[f]
+                        : eFeedbackStatus.values[int.parse(f)])
+                    .toList()
+                : [],
+            date = (json['date'] != null) ? DateTime.parse(json['date']) : null,
+            reactionSort = (json['reactionSort'] != null)
+                ? (json['reactionSort'] is int)
+                    ? eReactionSort.values[json['reactionSort']]
+                    : eReactionSort.values[int.parse(json['reactionSort'])]
+                : null,
+            page = (json['page'] != null)
+                ? (json['page'] is int)
+                    ? json['page']
+                    : int.parse(json['page'])
+                : null;
+
+    Map<String?, dynamic> toJson() => {
+            'userId': userId,
+            'message': message,
+            'feedbackTypes': feedbackTypes.map((f) => f.index).toList(),
+            'feedbackStatuses': feedbackStatuses.map((f) => f.index).toList(),
+            'date': date?.toString(),
+            'reactionSort': reactionSort?.index,
+            'page': page,
+        }.removeNulls();
+
+    SearchFeedBackDTORequest copyWith({
+        String? userId,
+        String? message,
+        List<eFeedbackType>? feedbackTypes,
+        List<eFeedbackStatus>? feedbackStatuses,
+        DateTime? date,
+        eReactionSort? reactionSort,
+        int? page,
+    }) {
+        return SearchFeedBackDTORequest(
+        userId: userId ?? this.userId,
+        message: message ?? this.message,
+        feedbackTypes: feedbackTypes ?? this.feedbackTypes,
+        feedbackStatuses: feedbackStatuses ?? this.feedbackStatuses,
+        date: date ?? this.date,
+        reactionSort: reactionSort ?? this.reactionSort,
+        page: page ?? this.page,
+        );
+    }
+
+    @override
+    operator ==(Object other) {
+        return other is SearchFeedBackDTORequest &&
+            other.userId == userId &&
+            other.message == message &&
+            listEquals(other.feedbackTypes, feedbackTypes) &&
+            listEquals(other.feedbackStatuses, feedbackStatuses) &&
+            other.date == date &&
+            other.reactionSort == reactionSort &&
+            other.page == page;
+    }
+
+    @override
+    int get hashCode {
+        return Object.hash(
+        userId,
+        message,
+        Object.hashAll(feedbackTypes),
+        Object.hashAll(feedbackStatuses),
+        date,
+        reactionSort,
+        page,
+        );
+    }
+    }
+
+A C# controller example:
+
+    using ContractAPI.Filters;
+    using ContractAPI.Utils;
+    using ContractDTOs.Models;
+    using ContractServices;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using SharedDTOs.Request;
+
+    namespace ContractAPI.Controllers
+    {
+        [Authorize]
+        [ApiController]
+        [Route("contract-api/[controller]")]
+        public class FeedbackController(ILogger<FeedbackController> logger, IFeedbackService feedbackService) : ApiControllerBase
+        {
+            [HttpGet]
+            [Route("{id}")]
+            [ServiceCertificateValidation("Owner,Admin,Support")]
+            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FeedbackDTO))]
+            public async Task<IActionResult> GetFeedback(string id)
+            {
+                try
+                {
+                    FeedbackDTO? feedback = await feedbackService.GetFeedback(id);
+
+                    return Ok(feedback);
+                }
+                catch (Exception ex)
+                {
+                    return BaseExceptionHandler(logger, ex);
+                }
+            }
+
+            /// <summary>
+            /// Allow user
+            /// </summary>
+            /// <param name="feedbackDTO"></param>
+            /// <returns></returns>
+            [HttpPost]
+            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FeedbackDTO))]
+            public async Task<IActionResult> AddFeedback(FeedbackDTO feedbackDTO)
+            {
+                try
+                {
+                    FeedbackDTO feedback = await feedbackService.AddFeedback(HttpContext.GetUserId(), feedbackDTO);
+                    return Ok(feedback);
+                }
+                catch (Exception ex)
+                {
+                    return BaseExceptionHandler(logger, ex);
+                }
+            }
+
+            [HttpPut]
+            [ServiceCertificateValidation("Owner,Admin,Support")]
+            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FeedbackDTO))]
+            public async Task<IActionResult> UpdateFeedback(FeedbackDTO feedbackDTO)
+            {
+                try
+                {
+                    FeedbackDTO feedback = await feedbackService.UpdateFeedback(HttpContext.GetUserId(), feedbackDTO);
+                    return Ok(feedback);
+                }
+                catch (Exception ex)
+                {
+                    return BaseExceptionHandler(logger, ex);
+                }
+            }
+
+            /// <summary>
+            /// Allow user
+            /// </summary>
+            /// <param name="userId"></param>
+            /// <param name="dateTime"></param>
+            /// <returns></returns>
+            [HttpGet]
+            [Route("today")]
+            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<FeedbackDTO>))]
+            public async Task<IActionResult> FromToday()
+            {
+                try
+                {
+                    List<FeedbackDTO> feedbacks = await feedbackService.FromToday(HttpContext.GetUserId());
+                    return Ok(feedbacks);
+                }
+                catch (Exception ex)
+                {
+                    return BaseExceptionHandler(logger, ex);
+                }
+            }
+
+            [HttpPost]
+            [Route("search")]
+            [ServiceCertificateValidation("Owner,Admin,Support")]
+            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<FeedbackDTO>))]
+            public async Task<IActionResult> Search(string userId, SearchFeedBackDTORequest searchFeedBackDTORequest)
+            {
+                try
+                {
+                    List<FeedbackDTO> feedbacks = await feedbackService.Search(searchFeedBackDTORequest);
+                    return Ok(feedbacks);
+                }
+                catch (Exception ex)
+                {
+                    return BaseExceptionHandler(logger, ex);
+                }
+            }
+
+            /// <summary>
+            /// Allow user
+            /// </summary>
+            /// <param name="userId"></param>
+            /// <param name="searchFeedBackDTORequest"></param>
+            /// <returns></returns>
+            [HttpPost]
+            [Route("top")]
+            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<FeedbackDTO>))]
+            public async Task<IActionResult> TopFeedback(SearchFeedBackDTORequest searchFeedBackDTORequest)
+            {
+                try
+                {
+                    List<FeedbackDTO> feedbacks = await feedbackService.TopFeedback(searchFeedBackDTORequest);
+                    return Ok(feedbacks);
+                }
+                catch (Exception ex)
+                {
+                    return BaseExceptionHandler(logger, ex);
+                }
+
+            }
+        }
+    }
+
+and its output should be:
+
+    import 'package:champions_lib/data/end_points.dart';
+    import 'package:champions_lib/dtos/contract/models/feedback_dto.dart';
+    import 'package:champions_lib/dtos/contract/request/search_feedback_dto_request.dart';
+    import 'package:champions_lib/providers/custom_dio.dart';
+    import 'package:dio/dio.dart';
+    import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+    part 'feedback_repository.g.dart';
+
+    @Riverpod(dependencies: [CustomDio])
+    class FeedbackRepository extends _$FeedbackRepository {
+    @override
+    build() {
+        return null;
+    }
+
+    Future<FeedbackDTO?> getFeedback(
+        String id, {
+        CancelToken? cancelToken,
+    }) async {
+        Response response = await ref.read(customDioProvider).get(
+            EndPoints.GET_FEEDBACK + id,
+            cancelToken: cancelToken,
+            );
+
+        if (response.data != "") {
+        return FeedbackDTO.fromJson(response.data);
+        }
+
+        return null;
+    }
+
+    Future<FeedbackDTO?> addFeedback(
+        FeedbackDTO feedbackDTO, {
+        CancelToken? cancelToken,
+    }) async {
+        Response response = await ref.read(customDioProvider).post(
+            EndPoints.ADD_FEEDBACK,
+            data: feedbackDTO.toJson(),
+            cancelToken: cancelToken,
+            );
+
+        if (response.data != "") {
+        return FeedbackDTO.fromJson(response.data);
+        }
+
+        return null;
+    }
+
+    Future<FeedbackDTO?> updateFeedback(
+        FeedbackDTO feedbackDTO, {
+        CancelToken? cancelToken,
+    }) async {
+        Response response = await ref.read(customDioProvider).put(
+            EndPoints.UPDATE_FEEDBACK,
+            data: feedbackDTO.toJson(),
+            cancelToken: cancelToken,
+            );
+
+        if (response.data != "") {
+        return FeedbackDTO.fromJson(response.data);
+        }
+
+        return null;
+    }
+
+    Future<List<FeedbackDTO>> fromToday({
+        CancelToken? cancelToken,
+    }) async {
+        Response response = await ref.read(customDioProvider).get(
+            EndPoints.FROM_TODAY,
+            cancelToken: cancelToken,
+            );
+
+        if (response.data != "") {
+        return response.data
+            .map<FeedbackDTO>((s) => FeedbackDTO.fromJson(s))
+            .toList();
+        }
+
+        return [];
+    }
+
+    Future<List<FeedbackDTO>> search(
+        String userId,
+        SearchFeedBackDTORequest searchFeedBackDTORequest, {
+        CancelToken? cancelToken,
+    }) async {
+        Response response = await ref.read(customDioProvider).post(
+            EndPoints.SEARCH,
+            queryParameters: {
+                'userId': userId,
+                'searchFeedBackDTORequest': searchFeedBackDTORequest,
+            },
+            cancelToken: cancelToken,
+            );
+
+        if (response.data != "") {
+        return response.data
+            .map<FeedbackDTO>((s) => FeedbackDTO.fromJson(s))
+            .toList();
+        }
+
+        return [];
+    }
+
+    Future<List<FeedbackDTO>> topFeedback(
+        SearchFeedBackDTORequest searchFeedBackDTORequest, {
+        CancelToken? cancelToken,
+    }) async {
+        Response response = await ref.read(customDioProvider).post(
+            EndPoints.TOP_FEEDBACK,
+            data: searchFeedBackDTORequest.toJson(),
+            cancelToken: cancelToken,
+            );
+
+        if (response.data != "") {
+        return response.data
+            .map<FeedbackDTO>((s) => FeedbackDTO.fromJson(s))
+            .toList();
+        }
+
+        return [];
+    }
+    }

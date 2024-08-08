@@ -1,0 +1,37 @@
+name: gemini_interop
+description: "A new Flutter project."
+publish_to: 'none' 
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  file_picker: ^8.0.7
+  google_generative_ai: ^0.4.4
+  hooks_riverpod: ^2.5.1
+  flutter_hooks: ^0.20.5
+  riverpod_annotation: ^2.3.5
+  dio: ^5.5.0+1
+  flex_seed_scheme: ^3.1.2
+  google_fonts: ^6.2.1
+  flutter_portal: ^1.1.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  riverpod_generator: ^2.4.0
+  build_runner: ^2.4.11
+  custom_lint: ^0.6.4
+  riverpod_lint: ^2.3.10
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/gemini/
+    
+                                      
