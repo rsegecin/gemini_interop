@@ -21,3 +21,5 @@ To build this project add a new configuration to your `launch.json` file:
     }
 
 if `launch.json` on vscode click in `Run and Debug` and click "create a launch.json file".
+
+To run this project set an environment variable called "GEMINI_KEY" with its value the API key.

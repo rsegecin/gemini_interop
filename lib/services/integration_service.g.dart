@@ -7,7 +7,7 @@ part of 'integration_service.dart';
 // **************************************************************************
 
 String _$integrationServiceHash() =>
-    r'33f3fd1c68600f0c0e947c3adda75373881a1b95';
+    r'ce4c2c1cb1b9239616834997c2493836ee156328';
 
 /// See also [IntegrationService].
 @ProviderFor(IntegrationService)

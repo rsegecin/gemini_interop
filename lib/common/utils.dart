@@ -27,4 +27,14 @@ class Utils {
 
     return Uri.decodeComponent(newUri.toString());
   }
+
+  static String getApiKey() {
+    var apiKey = const String.fromEnvironment('GEMINI_KEY', defaultValue: "");
+
+    if (apiKey == "") {
+      apiKey = Platform.environment['GEMINI_KEY'] ?? "";
+    }
+
+    return apiKey;
+  }
 }

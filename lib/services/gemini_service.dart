@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:gemini_interop/common/utils.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -10,23 +11,27 @@ class GeminiService extends _$GeminiService {
   late GenerativeModel generativeModel;
 
   @override
-  Future build() async {
-    const apiKey = String.fromEnvironment('GEMINI_KEY', defaultValue: "");
+  Future<bool> build() async {
+    var apiKey = Utils.getApiKey();
 
-    String promptPreamble = "";
+    if (apiKey != "") {
+      String promptPreamble = "";
 
-    promptPreamble =
-        await rootBundle.loadString('assets/gemini/instructions.txt');
+      promptPreamble =
+          await rootBundle.loadString('assets/gemini/instructions.txt');
 
-    generativeModel = GenerativeModel(
-      model: 'gemini-1.5-flash',
-      apiKey: apiKey,
-      systemInstruction: Content.text(promptPreamble),
-    );
+      generativeModel = GenerativeModel(
+        model: 'gemini-1.5-flash',
+        apiKey: apiKey,
+        systemInstruction: Content.text(promptPreamble),
+      );
 
-    generativeModel.startChat();
+      generativeModel.startChat();
 
-    return null;
+      return true;
+    }
+
+    return false;
   }
 
   Future<String> generateContent(String content) async {

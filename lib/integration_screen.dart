@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gemini_interop/common/utils.dart';
 import 'package:gemini_interop/services/integration_service.dart';
 import 'package:gemini_interop/services/theme_mode_state.dart';
 import 'package:gemini_interop/services/top_layer_service.dart';
@@ -14,6 +15,17 @@ class IntegrationScreen extends HookConsumerWidget {
     final controller = useTextEditingController();
 
     ref.watch(integrationServiceProvider);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Utils.getApiKey() == "") {
+        showDialog(
+          context: context,
+          builder: (context) => const AlertDialog(
+            content: Text("Could NOT load GEMINI_KEY"),
+          ),
+        );
+      }
+    });
 
     Future onTapConvertFile() async {
       ref.read(topLayerServiceProvider.notifier).showProcessing();
