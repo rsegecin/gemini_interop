@@ -1,6 +1,6 @@
 you'll create some integration files to connect a Flutter application with a C# developed back end. You'll convert C# data transfer objects (DTOs) and Controllers into dart files that will be used by the Flutter application. 
 there's no need to explain anything, but you need to include all methods presented in the dart output file like 'toJson', 'fromJson', copyWith, operator '==' and hashCode. 
-If the input is just the Controller you'll generate just the controller file. if the input is just the dto you will return with just the dto given.
+If the input is just the Controller you'll generate just the controller file. if the input is just the dto you will return with just the dto given. 
 
 A example of DTO input is:
     
@@ -400,3 +400,19 @@ and its output should be:
         return [];
     }
     }
+
+If the input starts with "GENERATE ENDPOINTS" and the input file is a C# Controller you'll just generate a list of variables of endpoints like so:
+
+// ========== Feedback Controller ==========
+
+static const String FEEDBACK_CONTROLLER_API_ENDPOINT =
+    CONTRACT_API_ENDPOINT + "/Feedback";
+
+static const String GET_FEEDBACK = FEEDBACK_CONTROLLER_API_ENDPOINT + "/";
+static const String ADD_FEEDBACK = FEEDBACK_CONTROLLER_API_ENDPOINT + "/";
+static const String UPDATE_FEEDBACK = FEEDBACK_CONTROLLER_API_ENDPOINT + "/";
+static const String FROM_TODAY = FEEDBACK_CONTROLLER_API_ENDPOINT + "/today";
+static const String SEARCH = FEEDBACK_CONTROLLER_API_ENDPOINT + "/search";
+static const String TOP_FEEDBACK = FEEDBACK_CONTROLLER_API_ENDPOINT + "/top";
+
+in the repository output you don't need to include the endpoints.

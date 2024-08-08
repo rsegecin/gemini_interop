@@ -31,6 +31,17 @@ class IntegrationService extends _$IntegrationService {
     return "";
   }
 
+  Future<String> generateSingleFile() async {
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(allowMultiple: false);
+
+    if ((result != null) && result.files.isNotEmpty) {
+      return await generateFile(File(result.xFiles[0].path));
+    }
+
+    return "";
+  }
+
   Future<String> generateMultipleFiles() async {
     String? directoryPath = await FilePicker.platform.getDirectoryPath();
 
@@ -46,14 +57,16 @@ class IntegrationService extends _$IntegrationService {
         });
 
         final futures = files.map((file) => generateFile(file)).toList();
-        await Future.wait(futures);
+        List<String> results = await Future.wait(futures);
+
+        return results.join("\n");
       }
     }
 
     return "";
   }
 
-  Future generateFile(File refFile) async {
+  Future<String> generateFile(File refFile) async {
     final generatedFilePath = Utils.generateFileName(refFile);
     var file = File(generatedFilePath);
 
@@ -64,6 +77,12 @@ class IntegrationService extends _$IntegrationService {
         .read(geminiServiceProvider.notifier)
         .generateContent(fileString);
 
+    final endpoints = await ref
+        .read(geminiServiceProvider.notifier)
+        .generateContent("GENERATE ENDPOINTS $fileString");
+
     file.writeAsString(content);
+
+    return endpoints;
   }
 }

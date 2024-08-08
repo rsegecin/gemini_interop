@@ -24,12 +24,31 @@ class IntegrationScreen extends HookConsumerWidget {
       ref.read(topLayerServiceProvider.notifier).hideProcessing();
     }
 
+    Future onTapGenerateSingle() async {
+      ref.read(topLayerServiceProvider.notifier).showProcessing();
+
+      controller.text = await ref
+          .read(integrationServiceProvider.notifier)
+          .generateSingleFile();
+
+      ref.read(topLayerServiceProvider.notifier).hideProcessing();
+    }
+
     Future onTapGenerateMultipleFiles() async {
       ref.read(topLayerServiceProvider.notifier).showProcessing();
 
       await ref
           .read(integrationServiceProvider.notifier)
-          .generateMultipleFiles();
+          .generateMultipleFiles()
+          .then(
+        (value) {
+          controller.text = value;
+
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Please check directory to see the generated files"),
+          ));
+        },
+      );
 
       ref.read(topLayerServiceProvider.notifier).hideProcessing();
     }
@@ -72,6 +91,12 @@ class IntegrationScreen extends HookConsumerWidget {
                     child: const Text("Convert a file"),
                     onPressed: () {
                       onTapConvertFile();
+                    },
+                  ),
+                  FilledButton(
+                    child: const Text("Generate Single Repository"),
+                    onPressed: () {
+                      onTapGenerateSingle();
                     },
                   ),
                   FilledButton(
